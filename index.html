@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notre Univers ❤️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body { 
+        background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); 
+        min-height: 100vh; 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+    }
+    .glass {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    /* --- ANIMATION MEMORY --- */
+    .memory-card {
+        perspective: 1000px;
+    }
+    .card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+    }
+    .flipped .card-inner {
+        transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 0.75rem;
+    }
+    .card-back {
+        transform: rotateY(180deg);
+    }
+
+#puzzle-board {
+    position: relative; /* Indispensable pour le placement des pièces */
+}
+
+.puzzle-tile {
+    position: absolute;
+    width: calc(100% / 3 - 4px); /* Ajuste selon ton gap */
+    height: calc(100% / 3 - 4px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.puzzle-blur {
+    filter: blur(8px) grayscale(40%);
+    pointer-events: none;
+}
+
+/* Couleurs style Kahoot */
+.btn-kahoot-0 { background-color: #e21b3c; } /* Rouge */
+.btn-kahoot-1 { background-color: #1368ce; } /* Bleu */
+.btn-kahoot-2 { background-color: #d89e00; } /* Jaune */
+.btn-kahoot-3 { background-color: #26890c; } /* Vert */
+
+.btn-kahoot:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+/* Correction de la grille Battle */
+#battle-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* Correction ici: columns au lieu de cols */
+    gap: 12px; /* Espacement plus large pour bien séparer les carrés */
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1.5rem;
+}
+
+.battle-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    border-radius: 1rem; /* Bords bien arrondis */
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+}
+
+/* Style de la croix blanche en premier plan */
+.battle-cross {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white !important; /* Force le blanc */
+    font-size: 2.5rem;
+    font-weight: 900;
+    z-index: 50; /* Passe au-dessus du flou */
+    text-shadow: 0 0 10px rgba(0,0,0,0.5); /* Ombre pour la faire ressortir */
+}
+
+/* Style Bloc-Note pour les lettres trouvées */
+.battle-hit {
+    background-color: #fefce8 !important; /* Jaune papier */
+    background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 100% 0.8rem;
+    border: 1px solid #fde047;
+    filter: none !important;
+}
+
+.battle-letter {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    font-weight: 900;
+    color: #1c1917;
+    font-size: 1.4rem;
+    z-index: 10;
+}
+/* 1. On prépare le conteneur du jeu Battle */
+#game-battle .glass {
+    position: relative;
+    overflow: hidden; /* Pour que le flou ne dépasse pas des bords arrondis */
+    z-index: 1;
+}
+
+/* 2. On crée le fond flou avec l'image battle.jpg */
+#game-battle .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('img/battle.jpg'); /* TON IMAGE DE FOND */
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px); /* L'effet de flou */
+    opacity: 0.4; /* On baisse l'opacité pour que ça reste lisible */
+    z-index: -1; /* On le place DERRIÈRE tout le contenu */
+}
+
+/* 3. On s'assure que la grille et les textes sont bien au-dessus */
+#game-battle .glass > * {
+    position: relative;
+    z-index: 10;
+}   
+</style>
+</head>
+<body class="p-4">
+
+    <div id="hub" class="max-w-md mx-auto py-10">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold text-white drop-shadow-md">Hello Ma Vie ❤️</h1>
+            <p class="text-white/80 mt-2 italic">Prête pour nos aventures ?</p>
+        </header>
+
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="showGame('memory')" class="glass p-6 rounded-3xl flex flex-col items-center hover:scale-105 transition">
+                <span class="text-4xl mb-2">🧠</span>
+                <span class="text-white font-bold text-sm">Memory</span>
+            </button>
+
+            <button onclick="showGame('flappy')" class="glass p-6 rounded-3xl flex flex-col items-center hover:scale-105 transition">
+                <span class="text-4xl mb-2">🎈</span>
+                <span class="text-white font-bold text-sm">Flappy-Cœur</span>
+            </button>
+
+            <button onclick="showGame('taquin')" class="glass p-6 rounded-3xl flex flex-col items-center hover:scale-105 transition">
+                <span class="text-4xl mb-2">🧩</span>
+                <span class="text-white font-bold text-sm">Puzzle</span>
+            </button>
+
+            <button onclick="showGame('quiz')" class="glass p-6 rounded-3xl flex flex-col items-center hover:scale-105 transition">
+                <span class="text-4xl mb-2">⚡</span>
+                <span class="text-white font-bold text-sm">Love Quiz</span>
+            </button>
+
+            <button onclick="showGame('battle')" class="glass p-6 rounded-3xl flex flex-col items-center hover:scale-105 transition">
+                <span class="text-4xl mb-2">🚢</span>
+                <span class="text-white font-bold text-sm">Touché-Coulé</span>
+            </button>
+
+            <button onclick="showGame('map')" class="glass p-6 rounded-3xl flex flex-col items-center hover:scale-105 transition">
+                <span class="text-4xl mb-2">📍</span>
+                <span class="text-white font-bold text-sm">Odyssée IdF</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="game-memory" class="hidden max-w-md mx-auto py-6">
+        <button onclick="goBack()" class="mb-4 text-white font-bold text-sm">← Retour au menu</button>
+        <div class="glass p-4 rounded-3xl">
+            <h2 class="text-2xl text-center text-white font-bold mb-4">Memory des Lovers</h2>
+            <div id="memory-grid" class="grid grid-cols-4 gap-2"></div>
+        </div>
+    </div>
+
+    <div id="game-taquin" class="hidden max-w-md mx-auto py-6">
+        <button onclick="goBack()" class="mb-4 text-white font-bold text-sm">← Retour au menu</button>
+        <div class="glass p-4 rounded-3xl">
+            <h2 class="text-2xl text-center text-white font-bold mb-4">Reconstitue notre photo 🧩</h2>
+            <div id="puzzle-board" class="grid grid-cols-3 gap-1 bg-white/20 p-1 rounded-xl aspect-square overflow-hidden puzzle-blur"></div>
+            <button onclick="startPuzzle()" class="mt-6 w-full bg-white text-pink-500 font-bold py-3 rounded-xl shadow-lg hover:bg-pink-50 transition">
+                Commencer le jeu
+            </button>
+        </div>
+    </div>
+
+    <div id="game-flappy" class="hidden max-w-md mx-auto py-6">
+        <button onclick="goBack()" class="mb-4 text-white font-bold text-sm">← Retour au menu</button>
+        <div class="glass p-4 rounded-3xl relative overflow-hidden" style="height: 500px;">
+            <canvas id="flappyCanvas" width="320" height="480" class="mx-auto rounded-xl border-2 border-white/50 bg-sky-200 shadow-inner"></canvas>
+            
+            <div id="flappy-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300">
+                <h3 id="flappy-status" class="text-white text-3xl font-bold mb-4">Prête ?</h3>
+                <button onclick="startFlappy()" class="bg-white text-pink-500 font-bold px-8 py-3 rounded-full shadow-lg hover:scale-110 transition">Jouer !</button>
+            </div>
+            
+            <div class="mt-4 text-center text-white font-bold">Score : <span id="flappy-score">0</span></div>
+        </div>
+    </div>
+
+<div id="game-quiz" class="hidden max-w-md mx-auto py-6">
+    <button onclick="goBack()" class="mb-4 text-white font-bold text-sm">← Retour au menu</button>
+    <div class="glass p-6 rounded-3xl text-white min-h-[450px] flex flex-col">
+        
+        <div id="quiz-start-screen" class="text-center my-auto">
+            <span class="text-6xl">📝</span>
+            <h2 class="text-3xl font-bold my-4">Love Quiz</h2>
+            <p class="mb-6 opacity-80">20 questions pour tester tes connaissances ! Les résultats s'affichent à la fin.</p>
+            <button onclick="startQuizNow()" class="w-full bg-white text-pink-500 font-bold py-3 rounded-xl shadow-lg">Commencer</button>
+        </div>
+
+        <div id="quiz-container" class="hidden flex-grow flex flex-col">
+            <div class="mb-6 text-center">
+                <div class="w-full bg-white/20 h-2 rounded-full mb-4">
+                    <div id="quiz-bar" class="bg-white h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <span id="quiz-progress" class="text-xs font-bold tracking-widest uppercase opacity-70"></span>
+                <h2 id="quiz-question" class="text-2xl font-bold mt-4"></h2>
+            </div>
+            <div id="quiz-options" class="grid grid-cols-2 gap-3 mt-auto"></div>
+        </div>
+
+        <div id="quiz-end-screen" class="hidden text-center my-auto">
+            <span class="text-6xl">🏁</span>
+            <h2 class="text-3xl font-bold my-4">Terminé !</h2>
+            <button onclick="showFinalReview()" class="w-full bg-white text-pink-500 font-bold py-3 rounded-xl shadow-lg">Voir mes résultats</button>
+        </div>
+
+        <div id="quiz-review" class="hidden flex-grow">
+            <h2 class="text-2xl font-bold text-center mb-2">Bilan</h2>
+            <p id="quiz-final-score" class="text-center text-3xl font-black mb-6 text-pink-200"></p>
+            <div id="quiz-review-list" class="space-y-4 max-h-[400px] overflow-y-auto pr-2"></div>
+            <button onclick="initQuiz()" class="mt-6 w-full bg-white/20 text-white font-bold py-3 rounded-xl border border-white/30">Recommencer</button>
+        </div>
+
+    </div>
+</div>
+
+   <div id="game-battle" class="hidden max-w-md mx-auto py-6">
+    <button onclick="goBack()" class="mb-4 text-white font-bold text-sm">← Retour au menu</button>
+    <div class="glass p-6 rounded-3xl text-white text-center">
+        
+        <div id="battle-start-screen" class="my-auto">
+            <span class="text-6xl">🚢</span>
+            <h2 class="text-3xl font-bold my-4">Love Battle</h2>
+            <p class="mb-6 opacity-80">Trouve les 5 mots doux cachés sous notre photo !</p>
+            <button onclick="startBattleNow()" class="w-full bg-white text-pink-500 font-bold py-3 rounded-xl shadow-lg">Commencer</button>
+        </div>
+
+        <div id="battle-container" class="hidden">
+            <div id="battle-board" class="grid grid-cols-6 gap-1 mx-auto relative overflow-hidden rounded-xl border-2 border-white/30 shadow-2xl" style="aspect-ratio: 6/8;">
+                </div>
+            <div class="mt-6 flex justify-around font-bold">
+                <div class="bg-white/20 px-4 py-2 rounded-full">❤️ Trouvés : <span id="battle-found">0</span>/5</div>
+                <div class="bg-white/20 px-4 py-2 rounded-full">💧 Ratés : <span id="battle-missed">0</span></div>
+            </div>
+        </div>
+
+        <div id="battle-win" class="hidden mt-6 p-4 bg-green-500/30 rounded-xl border border-green-500">
+            <p class="font-bold">Bravo mon cœur ! Tu as tout trouvé ❤️</p>
+            <button onclick="initBattle()" class="mt-2 text-sm underline">Rejouer</button>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
+<div id="game-map" class="hidden max-w-md mx-auto py-6">
+    <button onclick="goBack()" class="mb-4 text-white font-bold text-sm">← Retour au menu</button>
+    <div class="glass p-4 rounded-3xl text-white text-center">
+        <h2 class="text-2xl font-bold mb-2">Geo-Souvenir 🌍</h2>
+        <p id="map-question" class="text-sm opacity-90 mb-4 h-12 flex items-center justify-center font-semibold px-4"></p>
+
+        <div id="leaflet-map" class="w-full h-[400px] rounded-2xl border-2 border-white/50 shadow-2xl z-0"></div>
+
+        <div id="map-feedback" class="mt-4 min-h-[1.5em] font-bold text-pink-100 italic"></div>
+        <div id="map-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+    <div class="bg-white p-3 pb-10 rounded-sm shadow-2xl rotate-2 max-w-[280px] w-full border-[10px] border-white text-center">
+        <img id="map-modal-img" src="" class="w-full aspect-square object-cover mb-4">
+        <p id="map-modal-text" class="text-gray-800 font-bold text-sm px-2" style="font-family: 'Courier New', monospace;"></p>
+        
+        <button id="btn-next" onclick="nextMapQuestion()" class="hidden mt-6 bg-green-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">Continuer →</button>
+        
+        <button id="btn-retry" onclick="closeMapModal()" class="hidden mt-6 bg-red-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">Réessayer ↻</button>
+    </div>
+</div>
+    </div>
+</div>
+
+    <script>function showGame(gameId) { window.location.hash = gameId; }
+        function goBack() { window.location.hash = ""; }
+        function handleNavigation() {
+            const gameId = window.location.hash.replace('#', '');
+            const games = ['memory', 'flappy', 'taquin', 'quiz', 'battle', 'map'];
+            document.getElementById('hub').classList.add('hidden');
+            games.forEach(g => { if(document.getElementById('game-'+g)) document.getElementById('game-'+g).classList.add('hidden'); });
+            if (gameId && games.includes(gameId)) {
+                const activeGame = document.getElementById('game-' + gameId);
+                if (activeGame) {
+                    activeGame.classList.remove('hidden');
+                    if (gameId === 'map') initMap(); 
+                    if (gameId === 'battle') initBattle();
+                    if (gameId === 'memory') initMemory();
+                    if (gameId === 'taquin') initTaquin();
+                    if (gameId === 'flappy') initFlappy();
+                    if (gameId === 'quiz') initQuiz();
+                }
+            } else { document.getElementById('hub').classList.remove('hidden'); }
+        }
+        window.addEventListener('hashchange', handleNavigation);
+        window.addEventListener('load', handleNavigation);
+    </script>
+    <script src="memory.js"></script>
+    <script src="taquin.js"></script>
+    <script src="flappy.js"></script>
+    <script src="quiz.js"></script>
+    <script src="battle.js"></script>
+    <script src="map.js"></script>
+</body>
+</html>
